@@ -1,8 +1,7 @@
 import React,{useState,useRef}from "react";
 import { InteractionManager } from "react-native";
 import { Dimensions } from "react-native";
-import {  TextInput, IconButton } from "@react-native-material/core";
-import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, ScrollView ,FlatList,Image} from "react-native";
+import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, ScrollView ,FlatList,Image,TextInput,Alert,Switch} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Octicons from '@expo/vector-icons/Octicons';
@@ -12,9 +11,37 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { MaterialCommunityIcons, FontAwesome5,FontAwesome,Feather } from "@expo/vector-icons";
 import { Stack, Avatar, Flex } from "@react-native-material/core";
 import { useFonts } from 'expo-font';
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
-import { blue } from "react-native-reanimated/lib/typescript/Colors";
-import { RotateInDownRight } from "react-native-reanimated";
+import { Picker } from "@react-native-picker/picker";
+ import * as Yup from 'yup';
+ import {Formik} from 'formik';
+
+const SignupSchema = Yup.object().shape({
+   name: Yup.string()
+     .min(2, 'Too Short!')
+     .max(50, 'Too Long!')
+     .required('required field'),
+   companyname: Yup.string()
+     .min(2, 'Too Short!')
+     .required('Required field'),
+   country:Yup.string()
+     .required("choose your country"),
+   mobile:Yup.string()
+     .min(10,'invalid number')
+     .max(10,'invalid number')
+     .matches(/^[0-9]+/,'invalid number')
+     .required('invalid number'),
+   selectedOptions: Yup.array()
+    .min(1, 'Select at least one field')
+    .of(Yup.string())
+    .required('selected atleat one'),
+   agree: Yup.boolean()
+     .oneOf([true], 'You must agree before submitting.'),
+    
+    
+   
+ });
+ const OPTIONS = ['Investor', 'Finance', 'Logistics', 'Technology', 'Supplier', 'Legal', 'General'];
+
 const tabs = [
   { id: "1", label: "Bulk Orders, From  One Source" },
   { id: "2", label: "Certified Quality" },
@@ -34,6 +61,7 @@ const headings = [
     { label: "IT & Software", icon: "laptop" },
     { label: "Finance", icon: "wallet" },
 ];
+    
 const cards = [
     {
       id: 1,
@@ -106,7 +134,9 @@ const cards = [
         "List your products, reach verified global buyers, and grow direct sales alongside contract manufacturing.",
     },
   ];
+    
 export default function HefgroScreen() {
+    const [isChecked, setIsChecked] = useState(false);
     const [fontsLoaded] = useFonts({
     Poppins: require('../assets/fonts/Poppins/Poppins-Regular.ttf'),
     });
@@ -120,6 +150,7 @@ export default function HefgroScreen() {
     ...prev,
     [index]: !prev[index], // this is now safe
     }));
+    
   };
   return (
     <ScrollView style={styles.container}>
@@ -179,6 +210,41 @@ export default function HefgroScreen() {
        <View style={styles.section}>
         <Text style={styles.sectionTitle}>
           Empowering{"\n"}Businesses with{"\n"}Smart Sourcing & Operations
+        </Text>
+        <Text style={styles.sectionSubtitle}>
+          We provide high-quality raw materials, optimized procurement, and seamless supply chain
+          solutions across multiple industries.
+        </Text>
+        <View style={styles.container7}>
+          <TouchableOpacity
+        style={styles.viewAllButton1}
+        onPress={() => setExpanded(!expanded)}
+      >
+        <Text style={styles.viewAllText1}>
+          {expanded ? "View Less" : "View All"}
+        </Text>
+        <Ionicons
+          name={expanded ? "chevron-up" : "chevron-down"}
+          size={16}
+          color="white"
+        />
+      </TouchableOpacity>
+         <FlatList
+        data={expanded ? headings : headings.slice(0, 5)}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.induBox1}>
+          <Avatar icon={<Ionicons name={item.icon} size={24} color="#22C55E" />} color="#22C55E14"/>
+          <Text style={styles.induText}>{item.label}</Text>
+          </View>
+        )}
+      />
+      
+    </View>
+       </View> 
+       <View style={styles.section}>
+        <Text style={styles.sectionTitle}>
+          Large- Scale{"\n"}Industries,Reliable,safe & cost-Effective sourcing
         </Text>
         <Text style={styles.sectionSubtitle}>
           We provide high-quality raw materials, optimized procurement, and seamless supply chain
@@ -614,7 +680,7 @@ export default function HefgroScreen() {
         </View>
         <View style={styles.imagebox}>
           <Image
-          source={require("../assets/images/export.png")}  // local image
+          source={require("../assets/images/export.png")}  
           style={styles.image1}
           resizeMode="contain"
         />
@@ -623,7 +689,7 @@ export default function HefgroScreen() {
     <View style={styles.ship}>
       <View style={styles.imageview}>
         <Image
-          source={require("../assets/images/cont.jpg")}  // local image
+          source={require("../assets/images/cont.jpg")}  
           style={styles.image2}
           resizeMode="contain"
         />
@@ -878,7 +944,6 @@ export default function HefgroScreen() {
           source={require('../assets/images/blog.jpg')} 
           style={styles.blogImage}
         />
-
         <View style={styles.blogMeta}>
           <Text style={styles.tag}>Ecommerce</Text>
           <Text style={styles.date}>27 March 2025</Text>
@@ -894,7 +959,6 @@ export default function HefgroScreen() {
           source={require('../assets/images/hefgro.png')} 
           style={styles.hefgro_image}
         />
-    <View style={styles.form_cont}>
    {/*<Stack spacing={4} style={{ marginBottom: 500 }}>
       <Text style ={{width:298,height:54,fontSize:18,fontFamily:"Poppins",textAlign:"center",marginLeft:20,marginTop:50}}>
         Fill out the Form Below,And our Team Will Connect with you
@@ -910,82 +974,173 @@ export default function HefgroScreen() {
       
   </Stack>
   */}
-  <View style={styles.form_container}>
-      <Text style={styles.form_title}>
-        Fill out the form below, and our team will connect with you.
-      </Text>
-      <Text style={styles.label}>Full Name</Text>
-      <View style={styles.box}><Text style={styles.placeholder}>Your name</Text></View>
-      <Text style={styles.label}>Company Name</Text>
-      <View style={styles.box}><Text style={styles.placeholder}>Company name</Text></View>
-      <Text style={styles.label}>Mobile Number</Text>
-      <View style={styles.phoneRow}>
-        <Text style={styles.flag}>🇮🇳</Text>
-        <Text style={styles.codeText}>+91  </Text>
-        <View style={[styles.box, { flex: 1, marginLeft: 10 }]}>
-          <Text style={styles.placeholder}>8023456789</Text>
-        </View>
-      </View>
-      <View style={styles.checkboxRow}>
-        <View style={styles.tick}></View>
-        <Ionicons name="logo-whatsapp" size={18} color="green" />
-        <Text style={{ marginLeft: 5, flex: 1 ,fontFamily:"Poppins",fontSize:12}}>
-          Given number is your WhatsApp number
+  <Formik
+  initialValues={{
+    name: '',
+    companyname: '',
+    mobile: '',
+    country: '',
+    message: '',
+    selectedOptions: [] as string[],
+    agree: false,
+  }}
+   
+  validationSchema={SignupSchema}
+  onSubmit={(values) => {
+        Alert.alert('Success', 'Form submitted successfully!');
+  }}
+>
+  {({ values, errors, touched, handleSubmit,handleChange,setFieldTouched,isValid ,setFieldValue}) => (
+    <View>
+      <View style={styles.form}>
+        <Text style={styles.form_title}>
+          Fill out the form below, and our team will connect with you.
         </Text>
-        
-      </View>
-      <Text style={styles.label}>Select your country</Text>
-      <View style={styles.box}><Text style={styles.placeholder}>Your country</Text></View>
 
-     
-      <Text style={styles.label}>Your Message</Text>
-      <View style={[styles.box, { height: 100 }]}>
-        <Text style={styles.placeholder}>Your message</Text>
-      </View>
-    </View>
-     <Text style={styles.form_heading}>Select Partnership</Text>
-      <View style={styles.row}>
-        <View style={styles.option}>
-          <Text style={styles.optionText}>Investor</Text>
-        </View>
-        <View style={styles.option}>
-          <Text style={styles.optionText}>Finance</Text>
-        </View>
-        <View style={styles.option}>
-          <Text style={styles.optionText}>Logistics</Text>
-        </View>
-      </View>
+        <Text style={styles.label}>Full Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Your name"
+          value={values.name}
+          onChangeText={handleChange('name')}
+          onBlur={() => setFieldTouched('name')}
+        />
+        {touched.name && errors.name && (
+          <Text style={styles.errortxt}>{errors.name}</Text>
+        )}
+        <Text style={styles.label}>Company Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Company name"
+          value={values.companyname}
+          onChangeText={handleChange('companyname')}
+          onBlur={() => setFieldTouched('companyname')}
+        />
+        {touched.companyname && errors.companyname && (
+          <Text style={styles.errortxt}>{errors.companyname}</Text>
+        )}
 
-      <View style={styles.row}>
-        <View style={styles.option}>
-          <Text style={styles.optionText}>Technology</Text>
-        </View>
-        <View style={styles.option}>
-          <Text style={styles.optionText}>Supplier</Text>
-        </View>
-        <View style={styles.option}>
-          <Text style={styles.optionText}>Legal</Text>
-        </View>
-      </View>
+        <Text style={styles.label}>Mobile Number</Text>
 
-      <View style={styles.row}>
-        <View style={styles.option}>
-          <Text style={styles.optionText}>General</Text>
-        </View>
-      </View>
-
-      {/* Checkbox Section */}
-      <View style={styles.checkboxRow}>
-        <View style={styles.checkbox} />
-        <Text style={styles.checkbox_Text}>
-          I agree to receive updates and{"\n"}communications from HEFGRO.
-        </Text>
-      </View>
-      <TouchableOpacity style={styles.submitButton}>
-        <Text style={styles.submitText}>Submit</Text>
-        <Ionicons name="arrow-forward" size={16} color="#fff" style={{ marginLeft: 5 }} />
-      </TouchableOpacity>
+<View style={styles.phoneRow}>
+  {/* Country Picker */}
+  <View style={styles.countryCode}>
+    <Picker
+      selectedValue={values.country}
+      onValueChange={handleChange('country')}
+      onBlur={() => setFieldTouched('country')}
+      
+    >
+      <Picker.Item label="🇮🇳 +91" value="+91" />
+      <Picker.Item label="🇺🇸 +1" value="+1" />
+      <Picker.Item label="🇬🇧 +44" value="+44" />
+      <Picker.Item label="🇸🇬 +65" value="+65" />
+    </Picker>
   </View>
+
+  {/* Phone input */}
+  <TextInput
+    style={styles.phoneInput}
+    placeholder="8023456789"
+    keyboardType="phone-pad"
+    value={values.mobile}
+    onChangeText={handleChange('mobile')}
+    onBlur={() => setFieldTouched('mobile')}
+  />
+</View>
+{touched.mobile && errors.mobile && (
+  <Text style={styles.errortxt1}>{errors.mobile}</Text>
+)}
+ <TouchableOpacity onPress={() => setIsChecked(!isChecked)}>
+      <View style={styles.checkboxContainer}>
+        <View style={[styles.checkbox, isChecked && styles.checked]}>
+          {isChecked && <Text style={styles.tick}>✓</Text>}
+        </View>
+        <Text style={styles.label}>Given number is your WhatsApp number</Text>
+      </View>
+    </TouchableOpacity>
+        <Text style={styles.label}>Select your country</Text>
+        <View style={styles.pickerWrapper}>
+         
+          <Picker
+            selectedValue={values.country}
+            onValueChange={(val) => setFieldValue('country', val)}
+          >
+            <Picker.Item label="Select country" value="" />
+            <Picker.Item label="India" value="India" />
+            <Picker.Item label="USA" value="USA" />
+            <Picker.Item label="UK" value="UK" />
+          </Picker>
+          
+        </View>
+
+        <Text style={styles.label}>Your Message</Text>
+        <TextInput
+          style={[styles.input, { height: 100 }]}
+          multiline
+          placeholder="Your message"
+          value={values.message}
+          onChangeText={(text) => setFieldValue('message', text)}
+        />
+      </View>
+
+      <Text style={styles.form_heading1}>Select Partnership</Text>
+      <View style={styles.row1}>
+        {OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option}
+                style={[
+                  styles.option1,
+                  values.selectedOptions.includes(option) && styles.optionSelected,
+                ]}
+                onPress={() => {
+                  const newOptions = values.selectedOptions.includes(option)
+                    ? values.selectedOptions.filter((item) => item !== option)
+                    : [...values.selectedOptions, option];
+                  setFieldValue('selectedOptions', newOptions);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.optionText1,
+                    values.selectedOptions.includes(option) && styles.optionTextSelected,
+                  ]}
+                >
+                  {option}
+                </Text>
+              </TouchableOpacity>
+            ))}
+             {touched.selectedOptions && errors.selectedOptions && (
+          <Text style={styles.errortxt2}>{errors.selectedOptions}</Text>
+        )}
+      </View>
+      <View style={styles.checkboxContainer}>
+            <Switch
+              value={values.agree}
+              onValueChange={(newValue) => {
+                setFieldValue('agree', newValue);
+                setFieldTouched('agree');
+              }}
+            />
+            <Text style={styles.checkboxText}>
+              I agree to receive updates and communications from HEFGRO.
+            </Text>
+          </View>
+          <View style={styles.error_submit}>
+          {touched.agree && errors.agree && (
+            <Text style={styles.error}>{errors.agree}</Text>
+          )}
+
+          <TouchableOpacity style={styles.submitBtn} onPress={() => handleSubmit()}>
+            <Text style={styles.submitText}>Submit →</Text>
+          </TouchableOpacity>
+          </View>
+          
+
+    </View>
+  )}
+</Formik>
+
   <View style={styles.sign_cont}>
     <View style={styles.green}>
       <Text style={styles.green_heading}>Sign up to our news letter</Text>
@@ -1015,12 +1170,6 @@ export default function HefgroScreen() {
           source={require('../assets/images/apps.png')} 
           style={styles.vector_Image}
         />
-       {/*} <AntDesign name="twitter" size={24} color="black" />
-        <AntDesign name="linkedin-square" size={24} color="black" />
-        <AntDesign name="facebook-square" size={24} color="black" />
-        <AntDesign name="instagram" size={24} color="black" />
-        <AntDesign name="youtube" size={24} color="black" />
-             {*/}
       </View>
       <View style={styles.lastmail}>
         <AntDesign name="mail" size={24} color="#22C55E" />
@@ -1034,6 +1183,34 @@ export default function HefgroScreen() {
         <MaterialIcons name="location-on" size={24} color="#22C55E" />
         <Text style ={styles.mail_text}>Global headquarters- India</Text>
       </View>
+      <ScrollView contentContainerStyle={styles.container2}>
+      {cards.map((item) => (
+        <View key={item.id} style={styles.card}>
+          <Text style={styles.cardTitle}>{item.title}</Text>
+          <Text style={styles.redTitle}>{item.redTitle}</Text>
+          <Text style={styles.desc}>{item.redDesc}</Text>
+
+      {expandedItems[item.id.toString()] && (
+        <View style={{ marginTop: 10 }}>
+          <Text style={styles.greenTitle}>{item.greenTitle}</Text>
+          <Text style={styles.desc}>{item.greenDesc}</Text>
+        </View>
+      )}
+
+      <TouchableOpacity
+        onPress={() => toggleExpand(item.id.toString())}
+        style={styles.expandButton}
+      >
+        <AntDesign
+          name={expandedItems[item.id.toString()] ? "up" : "down"}
+          size={24}
+          color="white"
+        />
+      </TouchableOpacity>
+
+        </View>
+      ))}
+    </ScrollView>
     </View>    
   </View>
 </ScrollView>
@@ -1210,7 +1387,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#00c851",
     flexDirection: "row",
     marginLeft:50,
-    paddingHorizontal: 16,
+    paddingHorizontal: 80,
     paddingVertical: 8,
     borderRadius: 6,
     marginBottom: 20,
@@ -2291,89 +2468,201 @@ const styles = StyleSheet.create({
     marginBottom:28,
     marginLeft:22,
   },
-  form_cont:{
-    width:334,
-    height:1000,
-    backgroundColor:"#FFFFFF",
-    marginLeft:20,
-    marginRight:20,
-  },
-  form_container: {
+  form: {
     padding: 20,
-    backgroundColor: '#fff',
+    
+    backgroundColor: "#fff",
   },
   form_title: {
-    fontWeight: '500',
-    fontSize: 18,
-    fontFamily:"Poppins",
+    fontSize: 16,
+    fontWeight: "600",
     marginBottom: 20,
-    color:"#141F29",
+    fontFamily:"Poppins",
   },
   label: {
-    fontWeight: '500',
-    marginTop: 15,
-    marginBottom: 5,
-    color:"#141F29",
-    fontFamily:"Poppins",
+    marginTop: 10,
+    fontWeight: "500",
   },
-  box: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
-    padding: 10,
-    justifyContent: 'center',
-    height:42,
+  input: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginTop: 5,
+    borderWidth:1,
+    borderColor:"#E5E7EB",
     width:298,
+    height:42,
+    borderRadius:10,
+    
     
   },
-  placeholder: {
-    color: '#6B7280',
-    fontFamily:"Poppins",
-  },
-  tick:{
-    width:15,
-    height:15,
-    borderWidth:0.75,
-    borderColor:"#6B7280",
-    marginRight:10,
-  },
   phoneRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    width:298,
+    height:40,
+    flexDirection: "row",
+    marginTop: 5,
+    
   },
-  flag: {
-    fontSize: 20,
+  errortxt:{
+    color:"red",
+    
   },
-  codeText: {
-    marginLeft: 8,
-    fontSize: 14,
-    color:"#6B7280",
-    fontFamily:"Poppins",
+  countryCode: {
+  width: 150, 
+  height:40,
+  borderWidth: 1,
+  borderColor: "#ccc",
+  borderRadius: 10,
+  
+},   
+error_submit:{
+  backgroundColor:"#fff",
+  height:150,
+  
+},
+  phoneInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius:10,
+    borderColor: "#ccc",
+    width:300,
+    height:40,
+    flexDirection:"row",
+    marginLeft:10,
   },
+   errortxt2: {
+  color: 'red',
+  fontSize: 12,
+  marginTop: 4,
+  marginRight:70,
+},
+  errortxt1: {
+  color: 'red',
+  fontSize: 12,
+  marginTop: 4,
+  marginLeft: 170,
+},
   checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 10,
   },
-   form_heading: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 15,
-    fontFamily:"Poppins"
+  whatsappText: {
+    marginLeft: 8,
+    color: "#333",
+  },
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    marginTop: 5,
   },
   row: {
+   
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 12,
+  },
+  box: {
+    marginTop:20,
+    width: 22,
+    height: 22,
+    borderWidth: 1,
+    borderColor: "#666",
+    borderRadius: 4,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checked: {
+    backgroundColor: "#0a84ff",
+  },
+  tick: {
+    color: "white",
+    fontSize: 16,
+  },
+  whatsapp_label: {
+    marginTop:20,
+    marginLeft: 10,
+    fontSize: 14,
+  },
+ 
+   
+  whatsapp_row: {
     flexDirection: 'row',
     marginBottom: 10,
     gap: 10,
   },
+  form_heading1: {
+    padding: 20,
+    paddingTop: 10,
+    backgroundColor: '#fff',
+    flex: 1,
+  },
+  row1: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    
+  },
+  
   option: {
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 16,
+    borderColor: '#ccc',
     paddingVertical: 10,
-    paddingHorizontal: 18,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    margin: 5,
+  },
+  optionSelected: {
+    backgroundColor: '#0057FF',
+    borderColor: '#0057FF',
   },
   optionText: {
+    color: '#333',
+  },
+  optionTextSelected: {
+    color: '#fff',
+  },
+  checkboxContainer: {
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  checkboxText: {
+    marginTop:30,
+    marginLeft: 8,
+    flex: 1,
+  },
+  submitBtn: {
+    width:310,
+    height:48,
+    backgroundColor: '#22C55E',
+    marginLeft:35,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  submitText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  error: {
+    color: 'red',
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  option1: {
+    width: '30%',
+    height:36, 
+    marginBottom: 10,
+    
+    borderWidth: 1,
+    borderColor: '#aaa',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  optionText1: {
     fontSize: 12,
     color: '#141F29',
     fontFamily:"Poppins",
@@ -2412,7 +2701,7 @@ const styles = StyleSheet.create({
     marginTop:20,
     marginLeft:20,
   },
-  submitText: {
+  submit_Text: {
     fontSize: 14,
     fontWeight: 600,
     color: '#FFFFFF',
